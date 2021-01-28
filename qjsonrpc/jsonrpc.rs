@@ -7,9 +7,10 @@
 // specific language governing permissions and limitations relating to use of the SAFE Network
 // Software.
 
-use super::Error;
+use super::{Error, StructuredRequest, StructuredResponse};
 use rand::{self, Rng};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::convert::From;
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -36,6 +37,13 @@ impl JsonRpcRequest {
             params,
             id: rand::thread_rng().gen_range(0, std::u32::MAX) + 1,
         }
+    }
+}
+
+impl<T: StructuredRequest> From<T> for JsonRpcRequest {
+    /// Blanket implementation to allow extending From
+    fn from(req: T) -> Self {
+        req.to_jsonrpc_request()
     }
 }
 
@@ -77,6 +85,13 @@ impl JsonRpcResponse {
             }),
             id,
         }
+    }
+}
+
+impl<T: StructuredResponse> From<T> for JsonRpcResponse {
+    /// Blanket implementation to allow extending From
+    fn from(resp: T) -> Self {
+        resp.to_jsonrpc_response()
     }
 }
 

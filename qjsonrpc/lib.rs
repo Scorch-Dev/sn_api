@@ -11,6 +11,7 @@ mod client_endpoint;
 mod errors;
 mod jsonrpc;
 mod server_endpoint;
+mod structured;
 mod utils;
 
 const ALPN_QUIC_HTTP: &[&[u8]] = &[b"hq-24"];
@@ -18,5 +19,6 @@ const ALPN_QUIC_HTTP: &[&[u8]] = &[b"hq-24"];
 pub use client_endpoint::ClientEndpoint;
 pub use errors::{Error, Result};
 pub use server_endpoint::{Endpoint, IncomingConn, IncomingJsonRpcRequest, JsonRpcResponseStream};
+pub use structured::{StructuredRequest, StructuredResponse};
 
 pub use jsonrpc::{JsonRpcRequest, JsonRpcResponse};

@@ -7,7 +7,10 @@
 // specific language governing permissions and limitations relating to use of the SAFE Network
 // Software.
 
-use super::{jsonrpc::parse_jsonrpc_response, Error, JsonRpcRequest, Result, ALPN_QUIC_HTTP};
+use super::{
+    jsonrpc::parse_jsonrpc_response, Error, JsonRpcRequest, Result, StructuredRequest,
+    StructuredResponse, ALPN_QUIC_HTTP,
+};
 use crate::utils;
 use log::debug;
 use serde::de::DeserializeOwned;
@@ -168,11 +171,30 @@ impl OutgoingJsonRpcRequest {
     where
         T: DeserializeOwned,
     {
+        let jsonrpc_req = JsonRpcRequest::new(method, params);
+        self.send_request(jsonrpc_req).await
+    }
+
+    // Send a JSON_RPC request to the remote peer on current QUIC connection,
+    // awaiting for a JSON-RPC response which result is of type T: StructuredResponse
+    // Unlike the normal `send()`, this performs compile-time type checking on the parameters
+    // request: a qjsonrpc structured request
+    pub async fn send_checked<T>(&mut self, request: impl StructuredRequest) -> Result<T>
+    where
+        T: StructuredResponse,
+    {
+        self.send_request(request.into()).await
+    }
+
+    // The driver function for `send()` and `send_check()` which does the lifting
+    // of sending the JSON_RPC request to the remote peer on the current QUIC connection,
+    async fn send_request<T>(&mut self, jsonrpc_req: JsonRpcRequest) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
         let (mut send, recv) = self.quinn_connection.open_bi().await.map_err(|err| {
             Error::ClientError(format!("Failed to open communication stream: {}", err))
         })?;
-
-        let jsonrpc_req = JsonRpcRequest::new(method, params);
 
         let serialised_req = serde_json::to_string(&jsonrpc_req).map_err(|err| {
             Error::ClientError(format!("Failed to serialise request to be sent: {}", err))
