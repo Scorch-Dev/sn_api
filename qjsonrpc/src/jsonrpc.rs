@@ -78,6 +78,11 @@ impl JsonRpcResponse {
             id,
         }
     }
+
+    /// Get the read-only id field
+    pub fn id(&self) -> Option<u32> {
+        self.id
+    }
 }
 
 // It parses the request bytes an returns a JsonRpcRequest, or a

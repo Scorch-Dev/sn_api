@@ -2813,6 +2813,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "qjsonrpc_daemon"
+version = "0.0.1"
+dependencies = [
+ "futures 0.3.12",
+ "log",
+ "qjsonrpc",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio 0.2.24",
+ "url 2.2.0",
+]
+
+[[package]]
 name = "qp2p"
 version = "0.9.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
